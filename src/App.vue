@@ -6,6 +6,10 @@
           <pd-clock />
           <pd-shortcuts />
         </div>
+        <div class="narrow d-flex flex-column justify-space-between">
+          <div />
+          <pd-today-todos />
+        </div>
       </div>
     </v-content>
   </v-app>
@@ -15,11 +19,12 @@
 
 import pdClock from './components/Clock.vue';
 import pdShortcuts from './components/Shortcuts.vue';
+import pdTodayTodos from './components/TodayTodos.vue';
 
 export default {
   name: 'App',
   components: {
-    pdClock, pdShortcuts
+    pdClock, pdShortcuts, pdTodayTodos
   }
 }
 </script>
@@ -45,6 +50,6 @@ export default {
 }
 
 .narrow {
-  max-width: 320px;
+  width: 320px;
 }
 </style>

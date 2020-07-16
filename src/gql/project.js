@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-export const project = gql`
+export const projectFragment = gql`
   fragment project on Project {
     id
     name
@@ -9,9 +9,27 @@ export const project = gql`
   }
 `
 
-export const projectName = gql`
+export const projectNameFragment = gql`
   fragment projectName on Project {
     id
     name
   }
+`
+
+export const getAllProjectsQuery = gql`
+  query {
+    allProjects {
+      ...project
+    }
+  }
+  ${projectFragment}
+`
+
+export const getAllProjectNamesQuery = gql`
+  query {
+    allProjects {
+      ...projectNames
+    }
+  }
+  ${projectNameFragment}
 `

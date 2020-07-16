@@ -26,36 +26,13 @@
 </template>
 
 <script>
-import { getAllShortcuts } from "../gql/shortcut";
+import { getAllShortcutsQuery } from "../gql/shortcut";
 
 export default {
   name: "pd-shortcuts",
   data: function() {
     return {
-      query: getAllShortcuts,
-      shortcuts: [
-        {
-          name: "WhatsApp",
-          url: "https://web.whatsapp.com/",
-          icon: "mdi-whatsapp"
-        },
-        {
-          name: "JIRA Board",
-          url:
-            "https://goingmerry.atlassian.net/secure/RapidBoard.jspa?rapidView=11&view=planning.nodetail&issueLimit=100&assignee=5c1e5c6cd254b55db84c8a7e",
-          icon: "mdi-jira"
-        },
-        {
-          name: "Daily Standup",
-          url: "https://meet.google.com/kyz-zxoz-isx",
-          icon: "mdi-google-hangouts"
-        },
-        {
-          name: "OneDrive",
-          url: "https://onedrive.live.com/",
-          icon: "mdi-microsoft-onedrive"
-        }
-      ]
+      query: getAllShortcutsQuery
     };
   }
 };

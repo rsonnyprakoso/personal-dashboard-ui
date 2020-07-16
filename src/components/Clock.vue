@@ -26,7 +26,7 @@ export default {
       this.currentTime = Date.now()
     },
     showTime: function (time, timeZone = 'Asia/Jakarta') {
-      return (new Date(time)).toLocaleTimeString('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false })
+      return (new Date(time)).toLocaleTimeString('en-GB', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false })
     }
   },
   mounted: function () {

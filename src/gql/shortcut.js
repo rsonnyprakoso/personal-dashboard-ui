@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 
-export const shortcut = gql`
+export const shortcutFragment = gql`
   fragment shortcut on Shortcut {
     id
     name
@@ -9,11 +9,11 @@ export const shortcut = gql`
   }
 `
 
-export const getAllShortcuts = gql`
+export const getAllShortcutsQuery = gql`
   query {
     allShortcuts {
       ...shortcut
     }
   }
-  ${shortcut}
+  ${shortcutFragment}
 `
