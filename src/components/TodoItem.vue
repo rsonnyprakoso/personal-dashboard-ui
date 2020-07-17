@@ -1,12 +1,14 @@
 <template>
   <apollo-mutation :mutation="mutation" :variables="variables" :refetchQueries="refetchQueries">
-    <template v-slot="{ mutate }">
+    <template v-slot="{ mutate, loading }">
       <v-card light :class="`pd-todo-item d-flex ${priorityName} ${isComplete ? 'checked' : ''}`">
+        <v-progress-circular class="todo-loading" v-if="loading" size="20" width="2" indeterminate />
         <v-simple-checkbox
           off-icon="radio_button_unchecked"
           on-icon="check_circle"
           class="todo-checkbox"
           :value="isComplete"
+          v-else
           @input="mutate"
         />
         <div class="todo-label d-flex flex-column align-start">
@@ -63,6 +65,7 @@ export default {
   transition: 0.2s all linear;
   margin: 4px 0;
   padding: 8px;
+  align-items: center;
 
   &.checked {
     opacity: 0.5;
@@ -74,6 +77,11 @@ export default {
 
   .todo-checkbox {
     margin-right: 8px;
+  }
+
+  .todo-loading {
+    margin-left: 2px;
+    margin-right: 10px;
   }
 
   .todo-label {
@@ -89,7 +97,7 @@ export default {
   }
 
   &.high {
-    .todo-checkbox i {
+    .todo-checkbox i, .todo-loading {
       color: map-get($red, "lighten-1");
     }
 
@@ -103,7 +111,7 @@ export default {
   }
 
   &.medium {
-    .todo-checkbox i {
+    .todo-checkbox i, .todo-loading {
       color: map-get($orange, "darken-2");
     }
 
@@ -117,7 +125,7 @@ export default {
   }
 
   &.low {
-    .todo-checkbox i {
+    .todo-checkbox i, .todo-loading {
       color: map-get($green, "darken-2");
     }
 

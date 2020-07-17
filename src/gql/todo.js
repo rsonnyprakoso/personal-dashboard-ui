@@ -38,7 +38,7 @@ export const addTodoMutation = gql`
   mutation(
     $name: String!
     $scheduledOn: String!
-    $priority: TodoPriorityType!
+    $priority: Int!
     $projectId: ID!
   ) {
     createTodo(
@@ -61,7 +61,7 @@ export const updateTodoMutation = gql`
     $name: String
     $scheduledOn: String
     $isComplete: Boolean
-    $priority: TodoPriorityType
+    $priority: Int
     $projectId: ID!
   ) {
     updateTodo(
