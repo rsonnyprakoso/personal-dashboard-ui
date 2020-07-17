@@ -1,7 +1,7 @@
 <template>
   <apollo-mutation :mutation="mutation" :variables="variables" :refetchQueries="refetchQueries">
     <template v-slot="{ mutate }">
-      <v-card light :class="`pd-todo-item d-flex ${priority} ${isComplete ? 'checked' : ''}`">
+      <v-card light :class="`pd-todo-item d-flex ${priorityName} ${isComplete ? 'checked' : ''}`">
         <v-simple-checkbox
           off-icon="radio_button_unchecked"
           on-icon="check_circle"
@@ -14,7 +14,7 @@
           <div class="text-caption">
             <span class="project-name">{{ project.name }}</span>
             &nbsp;·&nbsp;
-            <small class="priority-label">{{ priority }}</small>
+            <small class="priority-label">{{ priorityName }}</small>
           </div>
         </div>
       </v-card>
@@ -34,6 +34,14 @@ export default {
     };
   },
   computed: {
+    priorityName: function() {
+      const priorityNames = {
+        '1': 'high',
+        '2': 'medium',
+        '3': 'low'
+      }
+      return priorityNames[this.priority];
+    },
     variables: function() {
       return {
         id: this.id,
@@ -105,6 +113,20 @@ export default {
 
     .priority-label {
       color: map-get($orange, "darken-4");
+    }
+  }
+
+  &.low {
+    .todo-checkbox i {
+      color: map-get($green, "darken-2");
+    }
+
+    .todo-label {
+      text-decoration-color: map-get($green, "darken-4");
+    }
+
+    .priority-label {
+      color: map-get($green, "darken-4");
     }
   }
 }
