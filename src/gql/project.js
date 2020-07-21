@@ -27,8 +27,8 @@ export const getAllProjectsQuery = gql`
 
 export const getAllProjectNamesQuery = gql`
   query {
-    allProjects {
-      ...projectNames
+    allProjects(sortBy: name_ASC) {
+      ...projectName
     }
   }
   ${projectNameFragment}
