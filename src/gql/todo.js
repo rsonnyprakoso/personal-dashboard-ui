@@ -54,7 +54,6 @@ export const addTodoMutation = gql`
   }
   ${todoFragment}
 `
-
 export const updateTodoMutation = gql`
   mutation(
     $id: ID!
@@ -72,6 +71,26 @@ export const updateTodoMutation = gql`
         priority: $priority
         isComplete: $isComplete
         project: { connect: { id: $projectId } }
+      }
+    ) {
+      ...todo
+    }
+  }
+  ${todoFragment}
+`
+export const updateTodoPartialMutation = gql`
+  mutation(
+    $id: ID!
+    $scheduledOn: String
+    $isComplete: Boolean
+    $priority: Int
+  ) {
+    updateTodo(
+      id: $id
+      data: {
+        scheduledOn: $scheduledOn
+        priority: $priority
+        isComplete: $isComplete
       }
     ) {
       ...todo
