@@ -1,7 +1,7 @@
 <template>
   <div class="transition-wrapper">
     <transition name="show-form">
-      <div v-if="mode === 'show'" class="show" key="show">
+      <div v-if="mode === 'list'" class="list" key="list">
         <apollo-query :query="query" :variables="variables">
           <template v-slot="{ result: { data }, isLoading }">
             <v-progress-circular v-if="isLoading" indeterminate color="white"></v-progress-circular>
@@ -13,12 +13,13 @@
                   :key="todo.id"
                   v-bind="todo"
                   :refetchQueries="[{ query, variables }]"
+                  @edit="startEdit(todo)"
                 />
               </transition-group>
               <div class="d-flex justify-space-between">
                 <v-tooltip top>
                   <template v-slot:activator="{ on }">
-                    <v-btn @click="mode = 'add'" icon color="white" x-large v-on="on">
+                    <v-btn @click="mode = 'form'" icon color="white" x-large v-on="on">
                       <v-icon>mdi-plus-box-multiple</v-icon>
                     </v-btn>
                   </template>
@@ -35,8 +36,8 @@
           </template>
         </apollo-query>
       </div>
-      <div v-if="mode === 'add'" class="add" key="add">
-        <pd-todo-form @close="mode = 'show'" :refetchQueries="[{ query, variables }]" />
+      <div v-if="mode === 'form'" class="form" key="form">
+        <pd-todo-form :task="taskToEdit" @close="closeForm" :refetchQueries="[{ query, variables }]" />
       </div>
     </transition>
   </div>
@@ -56,11 +57,22 @@ export default {
   },
   data: function() {
     return {
-      mode: "show",
+      mode: "list",
       showAddTodo: false,
       query: getTodayTodosQuery,
+      taskToEdit: null,
       variables: { today: moment().format("YYYY-MM-DD") }
     };
+  },
+  methods: {
+    startEdit: function(task) {
+      this.mode = 'form',
+      this.taskToEdit = task
+    },
+    closeForm: function() {
+      this.mode = 'list',
+      this.taskToEdit = null
+    }
   }
 };
 </script>
@@ -84,8 +96,8 @@ export default {
   }
 }
 
-.show,
-.add {
+.list,
+.form {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -97,13 +109,13 @@ export default {
   transition: all 0.2s ease;
 }
 
-.show-form-enter.show,
-.show-form-leave-to.show {
+.show-form-enter.list,
+.show-form-leave-to.list {
   transform: translateX(-100%);
 }
 
-.show-form-enter.add,
-.show-form-leave-to.add {
+.show-form-enter.form,
+.show-form-leave-to.form {
   transform: translateX(100%);
 }
 </style>

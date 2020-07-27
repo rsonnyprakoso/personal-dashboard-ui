@@ -98,3 +98,11 @@ export const updateTodoPartialMutation = gql`
   }
   ${todoFragment}
 `
+
+export const deleteTodoMutation = gql`
+  mutation($id: ID!) {
+    deleteTodo(id: $id) {
+      id
+    }
+  }
+`

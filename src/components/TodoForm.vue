@@ -157,7 +157,7 @@ import { getAllProjectNamesQuery } from "../gql/project";
 
 export default {
   name: "pd-todo-form",
-  props: ["id", "task", "refetchQueries"],
+  props: ["task", "refetchQueries"],
   data: function() {
     const today = moment().format("YYYY-MM-DD");
     const tomorrow = moment()
@@ -167,10 +167,11 @@ export default {
       today,
       tomorrow,
       showAlert: false,
+      id: (this.task && this.task.id) || "",
       name: (this.task && this.task.name) || "",
       scheduledOn: (this.task && this.task.scheduledOn) || today,
-      project: (this.task && this.task.project) || "",
-      priority: (this.task && this.task.priority) || "2",
+      project: (this.task && this.task.project && this.task.project.id) || "",
+      priority: (this.task && this.task.priority) ? this.task.priority.toString() :  "2",
       getProjects: {
         query: getAllProjectNamesQuery
       },
