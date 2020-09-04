@@ -14,16 +14,16 @@
                 :refetchQueries="[{ query }]"
                 @edit="startEdit(target)"
               />
+              <v-btn @click="mode = 'form'" class="add-button text-body-1" text color="white" v-on="on">
+                <v-icon small>mdi-plus</v-icon>
+                <span>Add Target</span>
+              </v-btn>
             </div>
           </template>
         </apollo-query>
       </div>
       <div v-if="mode === 'form'" class="form" key="form">
-        <pd-target-form
-          :target="targetToEdit"
-          @close="closeForm"
-          :refetchQueries="[{ query }]"
-        />
+        <pd-target-form :target="targetToEdit" @close="closeForm" :refetchQueries="[{ query }]" />
       </div>
     </transition>
   </div>
@@ -69,7 +69,7 @@ export default {
 .pd-targets {
   .heading {
     text-align: left;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
   }
 }
 
@@ -95,4 +95,12 @@ export default {
 .show-form-leave-to.form {
   transform: translateX(100%);
 }
+
+.add-button {
+  margin-top: 8px;
+  padding: 4px !important;
+  text-transform: none;
+  justify-content: flex-start;
+}
+
 </style>

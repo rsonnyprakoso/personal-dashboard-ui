@@ -23,7 +23,7 @@ export const getAllTargetsQuery = gql`
 export const addTargetMutation = gql`
   mutation(
     $name: String!
-    $cycle: String!
+    $cycle: Int!
     $cycleTarget: Int!
   ) {
     createTarget(
@@ -32,14 +32,17 @@ export const addTargetMutation = gql`
         cycle: $cycle
         cycleTarget: $cycleTarget
       }
-    )
+    ) {
+      ...target
+    }
   }
+  ${targetFragment}
 `
 export const updateTargetMutation = gql`
   mutation(
     $id: ID!
     $name: String!
-    $cycle: String!
+    $cycle: Int!
     $cycleTarget: Int!
   ) {
     updateTarget(
@@ -49,8 +52,11 @@ export const updateTargetMutation = gql`
         cycle: $cycle
         cycleTarget: $cycleTarget
       }
-    )
+    ) {
+      ...target
+    }
   }
+  ${targetFragment}
 `
 
 export const deleteTargetMutation = gql`

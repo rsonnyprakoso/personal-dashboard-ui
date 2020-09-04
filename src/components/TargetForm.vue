@@ -92,7 +92,7 @@
           >
             <v-progress-circular v-if="submitting" size="16" width="2" indeterminate />
             <span v-else>
-              
+              {{ !!id ? 'Edit Target' : 'Add Target' }}
             </span>
           </v-btn>
         </v-card-actions>
