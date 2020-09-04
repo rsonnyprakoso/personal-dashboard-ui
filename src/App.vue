@@ -7,7 +7,7 @@
           <pd-shortcuts />
         </div>
         <div class="narrow d-flex flex-column justify-space-between">
-          <div />
+          <pd-targets />
           <pd-today-todos />
         </div>
       </div>
@@ -19,12 +19,13 @@
 
 import pdClock from './components/Clock.vue';
 import pdShortcuts from './components/Shortcuts.vue';
+import pdTargets from './components/Targets.vue';
 import pdTodayTodos from './components/TodayTodos.vue';
 
 export default {
   name: 'App',
   components: {
-    pdClock, pdShortcuts, pdTodayTodos
+    pdClock, pdShortcuts, pdTodayTodos, pdTargets
   }
 }
 </script>
