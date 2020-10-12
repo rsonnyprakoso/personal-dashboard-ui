@@ -35,7 +35,7 @@
                 color="blue-grey"
                 small
               >
-                <v-icon>mdi-chevron-down</v-icon>
+                <v-icon>{{ showExtraContent ? 'mdi-dots-vertical-circle' : 'mdi-dots-vertical' }}</v-icon>
               </v-btn>
             </v-card-text>
             <transition appear name="show-extra">
@@ -152,7 +152,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 .pd-todo-item {
-  opacity: 1;
+  opacity: 0.9;
   transition: 0.2s all linear;
   margin: 4px 0;
   align-items: center;
@@ -168,7 +168,11 @@ export default {
 
   .item-content,
   .extra-content {
-    padding: 8px;
+    padding: 8px 12px;
+  }
+
+  .text-body-1 {
+    color: map-get($grey, "darken-3");
   }
 
   .extra-content {
@@ -178,10 +182,6 @@ export default {
 
   .expand-icon {
     transition: all 0.2s linear;
-
-    &.rotate {
-      transform: rotate(180deg);
-    }
   }
 
   .todo-checkbox {
@@ -203,7 +203,7 @@ export default {
   }
 
   .project-name {
-    color: map-get($blue-grey, "lighten-1");
+    color: grey;
   }
 
   &.high {

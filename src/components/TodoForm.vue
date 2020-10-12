@@ -260,7 +260,11 @@ export default {
 
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss">
+<style lang="scss" scoped>
+.todo-form {
+  overflow-y: scroll;
+}
+
 .v-select__selections input {
   width: 0 !important;
 }

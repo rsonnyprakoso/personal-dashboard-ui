@@ -15,6 +15,9 @@ export const getAllTargetsQuery = gql`
       sortBy: [cycle_ASC, cycleTarget_DESC]
     ) {
       ...target
+      _targetDoneListMeta {
+        count
+      }
     }
   }
   ${targetFragment}

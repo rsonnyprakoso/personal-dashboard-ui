@@ -7,14 +7,31 @@
             <v-progress-circular v-if="isLoading" indeterminate color="white"></v-progress-circular>
             <div v-else class="pd-targets d-flex flex-column justify-flex-start">
               <div class="heading text-body-1">Your targets</div>
-              <pd-target-item
-                v-for="target in data.allTargets"
-                :key="target.id"
-                v-bind="target"
-                :refetchQueries="[{ query }]"
-                @edit="startEdit(target)"
-              />
-              <v-btn @click="mode = 'form'" class="add-button text-body-1" text color="white" v-on="on">
+              <v-carousel
+                height="auto"
+                class="target-carousel"
+                hide-delimiters
+                light
+              >
+                <v-carousel-item
+                  v-for="target in data.allTargets"
+                  :key="target.id"
+                  eager
+                >
+                  <pd-target-item
+                    v-bind="target"
+                    :refetchQueries="[{ query }]"
+                    @edit="startEdit(target)"
+                  />
+                </v-carousel-item>
+              </v-carousel>
+              <v-btn
+                @click="mode = 'form'"
+                class="add-button text-body-1"
+                text
+                color="white"
+                v-on="on"
+              >
                 <v-icon small>mdi-plus</v-icon>
                 <span>Add Target</span>
               </v-btn>
@@ -23,7 +40,11 @@
         </apollo-query>
       </div>
       <div v-if="mode === 'form'" class="form" key="form">
-        <pd-target-form :target="targetToEdit" @close="closeForm" :refetchQueries="[{ query }]" />
+        <pd-target-form
+          :target="targetToEdit"
+          @close="closeForm"
+          :refetchQueries="[{ query }]"
+        />
       </div>
     </transition>
   </div>
@@ -44,7 +65,7 @@ export default {
     return {
       mode: "list",
       query: getAllTargetsQuery,
-      targetToEdit: null,
+      targetToEdit: null
     };
   },
   methods: {
@@ -58,6 +79,30 @@ export default {
 };
 </script>
 
+<style lang="scss">
+.target-carousel {
+  .v-window__container {
+    .v-window__prev,
+    .v-window__next {
+      top: 20px;
+      margin: 0 2px;
+      line-height: 1;
+      background-color: transparent;
+
+      .v-btn--icon {
+        height: 20px;
+        width: 20px;
+
+        .v-btn__content .v-icon {
+          height: 20px;
+          width: 20px;
+          font-size: 20px !important;
+        }
+      }
+    }
+  }
+}
+</style>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
@@ -66,6 +111,7 @@ export default {
   overflow: hidden;
   flex: 1;
 }
+
 .pd-targets {
   .heading {
     text-align: left;
@@ -102,5 +148,4 @@ export default {
   text-transform: none;
   justify-content: flex-start;
 }
-
 </style>
