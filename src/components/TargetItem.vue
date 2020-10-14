@@ -1,6 +1,4 @@
 <template>
-  <!-- <apollo-mutation :mutation="updateMutation" :refetchQueries="refetchQueries">
-  <template v-slot="{ mutate: update, loading: updating }">-->
   <apollo-mutation :mutation="deleteMutation" :refetchQueries="refetchQueries">
     <template v-slot="{ mutate: remove, loading: deleting }">
       <v-card
@@ -19,50 +17,60 @@
           <div class="item-text d-flex align-flex-start">
             <span class="text-body-1">{{ name }}</span>
             <span class="text-caption">{{ cycleName }}</span>
-            <div class="target-action flex-row align-start">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    icon
-                    class="bottom-icon"
-                    small
-                    v-on="on"
-                    @click="$emit('next')"
-                  >
-                    <v-icon small>mdi-plus</v-icon>
-                  </v-btn>
-                </template>
-                <span class="text-caption">Done one</span>
-              </v-tooltip>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    icon
-                    class="bottom-icon"
-                    small
-                    v-on="on"
-                    @click="$emit('edit')"
-                  >
-                    <v-icon small>mdi-pencil</v-icon>
-                  </v-btn>
-                </template>
-                <span class="text-caption">Edit</span>
-              </v-tooltip>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    icon
-                    class="bottom-icon"
-                    small
-                    v-on="on"
-                    @click="confirmDelete = true"
-                  >
-                    <v-icon small>mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-                <span class="text-caption">Delete</span>
-              </v-tooltip>
-            </div>
+            <apollo-mutation
+              :mutation="addTargetCountMutation"
+              :refetchQueries="refetchQueries"
+            >
+              <template v-slot="{ mutate: addCount, loading: addingCount }">
+                <div class="target-action flex-row align-start">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        class="bottom-icon"
+                        small
+                        v-on="on"
+                        :disabled="addingCount"
+                        @click="addCount({ variables: { targetId: id } })"
+                      >
+                        <v-icon small>mdi-plus</v-icon>
+                      </v-btn>
+                    </template>
+                    <span class="text-caption">Add count</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        class="bottom-icon"
+                        small
+                        v-on="on"
+                        :disabled="addingCount"
+                        @click="$emit('edit')"
+                      >
+                        <v-icon small>mdi-pencil</v-icon>
+                      </v-btn>
+                    </template>
+                    <span class="text-caption">Edit</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <v-btn
+                        icon
+                        class="bottom-icon"
+                        small
+                        v-on="on"
+                        :disabled="addingCount"
+                        @click="confirmDelete = true"
+                      >
+                        <v-icon small>mdi-delete</v-icon>
+                      </v-btn>
+                    </template>
+                    <span class="text-caption">Delete</span>
+                  </v-tooltip>
+                </div>
+              </template>
+            </apollo-mutation>
           </div>
         </v-card-text>
         <transition appear name="show-extra">
@@ -102,7 +110,7 @@
 </template>
 
 <script>
-import { updateTargetMutation, deleteTargetMutation } from "../gql/target";
+import { updateTargetMutation, deleteTargetMutation, addTargetDoneMutation } from "../gql/target";
 
 export default {
   name: "pd-target-item",
@@ -111,13 +119,14 @@ export default {
     "name",
     "cycle",
     "cycleTarget",
-    "refetchQueries",
     "_targetDoneListMeta",
+    "refetchQueries",
   ],
   data: function () {
     return {
       updateMutation: updateTargetMutation,
       deleteMutation: deleteTargetMutation,
+      addTargetCountMutation: addTargetDoneMutation,
       confirmDelete: false,
     };
   },

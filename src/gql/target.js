@@ -9,10 +9,21 @@ export const targetFragment = gql`
   }
 `
 
+export const targetDoneFragment = gql`
+  fragment targetDone on TargetDone {
+    id
+    doneAt
+    target {
+      ...target
+    }
+  }
+  ${targetFragment}
+`
+
 export const getAllTargetsQuery = gql`
   query {
     allTargets(
-      sortBy: [cycle_ASC, cycleTarget_DESC]
+      sortBy: [cycle_ASC, cycleTarget_DESC, name_ASC]
     ) {
       ...target
       _targetDoneListMeta {
@@ -41,6 +52,7 @@ export const addTargetMutation = gql`
   }
   ${targetFragment}
 `
+
 export const updateTargetMutation = gql`
   mutation(
     $id: ID!
@@ -60,6 +72,21 @@ export const updateTargetMutation = gql`
     }
   }
   ${targetFragment}
+`
+
+export const addTargetDoneMutation = gql`
+  mutation(
+    $targetId: ID!
+  ) {
+    createTargetDone(
+      data: {
+        target: { connect: { id: $targetId } }
+      }
+    ) {
+      ...targetDone
+    }
+  }
+  ${targetDoneFragment}
 `
 
 export const deleteTargetMutation = gql`
