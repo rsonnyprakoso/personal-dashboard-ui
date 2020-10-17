@@ -18,7 +18,9 @@ export const projectNameFragment = gql`
 
 export const getAllProjectsQuery = gql`
   query {
-    allProjects {
+    allProjects(
+      sortBy: [priority_ASC, name_ASC]
+    ) {
       ...project
     }
   }
@@ -32,4 +34,48 @@ export const getAllProjectNamesQuery = gql`
     }
   }
   ${projectNameFragment}
+`
+
+export const addProjectMutation = gql`
+  mutation(
+    $name: String!
+    $priority: Int!
+  ) {
+    createProject(
+      data: {
+        name: $name
+        priority: $priority
+      }
+    ) {
+      ...project
+    }
+  }
+  ${projectFragment}
+`
+
+export const updateProjectMutation = gql`
+  mutation(
+    $id: ID!
+    $name: String!
+    $priority: Int!
+  ) {
+    updateProject(
+      id: $id
+      data: {
+        name: $name
+        priority: $priority
+      }
+    ) {
+      ...project
+    }
+  }
+  ${projectFragment}
+`
+
+export const deleteProjectMutation = gql`
+  mutation($id: ID!) {
+    deleteProject(id: $id) {
+      id
+    }
+  }
 `

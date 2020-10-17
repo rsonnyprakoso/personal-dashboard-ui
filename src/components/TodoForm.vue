@@ -131,7 +131,7 @@
           >Are you sure you want to cancel? All unsaved data will be cleared!</v-alert>
         </transition>
         <v-card-actions class="blue-grey lighten-5 justify-space-between">
-          <v-btn v-if="showAlert" color="red" text small @click="$emit('close')">yes, cancel!</v-btn>
+          <v-btn v-if="showAlert" color="red" text small @click="cancelForm()">yes, cancel!</v-btn>
           <v-btn v-else text small @click="showAlert = true">cancel</v-btn>
           <v-btn
             v-if="showAlert"
@@ -226,6 +226,10 @@ export default {
       if (Object.keys(error).length === 0) {
         submit();
       }
+    },
+    cancelForm: function () {
+      this.showAlert = false;
+      this.$emit('close')
     }
   },
   computed: {

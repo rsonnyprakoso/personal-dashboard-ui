@@ -2,13 +2,12 @@
   <v-app dark>
     <v-content>
       <div class="container d-flex align-stretch justify-space-between flex-row">
-        <div class="narrow d-flex flex-column justify-space-between">
+        <div class="left-side narrow d-flex flex-column justify-space-between">
           <pd-clock />
           <pd-shortcuts />
         </div>
-        <div class="narrow d-flex flex-column justify-space-between">
-          <pd-targets />
-          <pd-today-todos />
+        <div class="right-side narrow d-flex flex-column justify-space-between">
+          <pd-today-focus />
         </div>
       </div>
     </v-content>
@@ -19,13 +18,12 @@
 
 import pdClock from './components/Clock.vue';
 import pdShortcuts from './components/Shortcuts.vue';
-import pdTargets from './components/Targets.vue';
-import pdTodayTodos from './components/TodayTodos.vue';
+import pdTodayFocus from './components/TodayFocus.vue';
 
 export default {
   name: 'App',
   components: {
-    pdClock, pdShortcuts, pdTodayTodos, pdTargets
+    pdClock, pdShortcuts, pdTodayFocus
   }
 }
 </script>
@@ -52,5 +50,9 @@ export default {
 
 .narrow {
   width: 320px;
+}
+
+.left-side, .right-side {
+  position: relative;
 }
 </style>

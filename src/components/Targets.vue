@@ -1,53 +1,48 @@
 <template>
-  <div class="transition-wrapper">
-    <transition name="show-form">
-      <div v-if="mode === 'list'" class="list" key="list">
-        <apollo-query :query="query">
-          <template v-slot="{ result: { data }, isLoading }">
-            <v-progress-circular v-if="isLoading" indeterminate color="white"></v-progress-circular>
-            <div v-else class="pd-targets d-flex flex-column justify-flex-start">
-              <div class="heading text-body-1">Your targets</div>
-              <v-carousel
-                height="auto"
-                class="target-carousel"
-                hide-delimiters
-                light
-              >
-                <v-carousel-item
-                  v-for="target in data.allTargets"
-                  :key="target.id"
-                  eager
-                >
-                  <pd-target-item
-                    v-bind="target"
-                    :refetchQueries="[{ query }]"
-                    @edit="startEdit(target)"
-                  />
-                </v-carousel-item>
-              </v-carousel>
-              <v-btn
-                @click="mode = 'form'"
-                class="add-button text-body-1"
-                text
-                color="white"
-                v-on="on"
-              >
-                <v-icon small>mdi-plus</v-icon>
-                <span>Add Target</span>
-              </v-btn>
-            </div>
-          </template>
-        </apollo-query>
-      </div>
-      <div v-if="mode === 'form'" class="form" key="form">
-        <pd-target-form
-          :target="targetToEdit"
-          @close="closeForm"
+  <apollo-query :query="query">
+    <template v-slot="{ result: { data }, isLoading }">
+      <v-progress-circular
+        v-if="isLoading"
+        indeterminate
+        color="white"
+      ></v-progress-circular>
+      <div v-else :class="`pd-targets ${showForm ? 'blur' : ''} d-flex flex-column justify-flex-start`">
+        <div class="heading text-body-1">Your targets</div>
+        <pd-target-item
+          v-bind="target"
+          v-for="target in data.allTargets"
+          :key="target.id"
           :refetchQueries="[{ query }]"
+          @edit="startEdit(target)"
         />
+        <v-menu
+          v-model="showForm"
+          :close-on-content-click="false"
+          absolute
+          attach=".right-side"
+          max-width="100%"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              class="add-button text-body-1"
+              text
+              color="white"
+              v-on="on"
+              v-bind="attrs"
+            >
+              <v-icon small>mdi-plus</v-icon>
+              <span>Add Target</span>
+            </v-btn>
+          </template>
+          <pd-target-form
+            :target="targetToEdit"
+            @close="closeForm"
+            :refetchQueries="[{ query }]"
+          />
+        </v-menu>
       </div>
-    </transition>
-  </div>
+    </template>
+  </apollo-query>
 </template>
 
 <script>
@@ -63,17 +58,19 @@ export default {
   },
   data: function () {
     return {
-      mode: "list",
+      showForm: false,
       query: getAllTargetsQuery,
-      targetToEdit: null
+      targetToEdit: null,
     };
   },
   methods: {
     startEdit: function (target) {
-      (this.mode = "form"), (this.targetToEdit = target);
+      this.showForm = true;
+      this.targetToEdit = target;
     },
     closeForm: function () {
-      (this.mode = "list"), (this.targetToEdit = null);
+      this.showForm = false;
+      this.targetToEdit = null;
     },
   },
 };
@@ -106,46 +103,33 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-.transition-wrapper {
-  position: relative;
-  overflow: hidden;
-  flex: 1;
-}
-
 .pd-targets {
+  opacity: 1;
+  transition: opacity 0.5s;
+
+  &.blur {
+    opacity: 0.2;
+  }
+
   .heading {
     text-align: left;
     margin-bottom: 20px;
   }
 }
 
-.list,
-.form {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
-.show-form-enter-active,
-.show-form-leave-active {
-  transition: all 0.2s ease;
-}
-
-.show-form-enter.list,
-.show-form-leave-to.list {
-  transform: translateX(-100%);
-}
-
-.show-form-enter.form,
-.show-form-leave-to.form {
-  transform: translateX(100%);
+.v-menu__content {
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: unset !important;
 }
 
 .add-button {
+  background-color: rgba(255, 255, 255, 0.2);
   margin-top: 8px;
-  padding: 4px !important;
+  padding: 4px 8px !important;
   text-transform: none;
   justify-content: flex-start;
+  font-weight: 600;
 }
 </style>

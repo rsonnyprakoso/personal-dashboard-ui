@@ -4,8 +4,9 @@
       <v-card
         light
         :class="`pd-target-item ${confirmDelete ? 'with-extra' : ''}`"
+        elevation="1"
       >
-        <v-card-text class="item-content d-flex">
+        <v-card-text class="item-content d-flex align-items-center">
           <v-progress-circular
             :rotate="-90"
             :value="completion"
@@ -16,61 +17,63 @@
           </v-progress-circular>
           <div class="item-text d-flex align-flex-start">
             <span class="text-body-1">{{ name }}</span>
-            <span class="text-caption">{{ cycleName }}</span>
-            <apollo-mutation
-              :mutation="addTargetCountMutation"
-              :refetchQueries="refetchQueries"
-            >
-              <template v-slot="{ mutate: addCount, loading: addingCount }">
-                <div class="target-action flex-row align-start">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        icon
-                        class="bottom-icon"
-                        small
-                        v-on="on"
-                        :disabled="addingCount"
-                        @click="addCount({ variables: { targetId: id } })"
-                      >
-                        <v-icon small>mdi-plus</v-icon>
-                      </v-btn>
-                    </template>
-                    <span class="text-caption">Add count</span>
-                  </v-tooltip>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        icon
-                        class="bottom-icon"
-                        small
-                        v-on="on"
-                        :disabled="addingCount"
-                        @click="$emit('edit')"
-                      >
-                        <v-icon small>mdi-pencil</v-icon>
-                      </v-btn>
-                    </template>
-                    <span class="text-caption">Edit</span>
-                  </v-tooltip>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                      <v-btn
-                        icon
-                        class="bottom-icon"
-                        small
-                        v-on="on"
-                        :disabled="addingCount"
-                        @click="confirmDelete = true"
-                      >
-                        <v-icon small>mdi-delete</v-icon>
-                      </v-btn>
-                    </template>
-                    <span class="text-caption">Delete</span>
-                  </v-tooltip>
-                </div>
-              </template>
-            </apollo-mutation>
+            <div class="d-flex justify-space-between align-end">
+              <span class="text-caption">{{ cycleName }}</span>
+              <apollo-mutation
+                :mutation="addTargetCountMutation"
+                :refetchQueries="refetchQueries"
+              >
+                <template v-slot="{ mutate: addCount, loading: addingCount }">
+                  <div class="target-action flex-row align-start">
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          :disabled="addingCount"
+                          @click="addCount({ variables: { targetId: id } })"
+                        >
+                          <v-icon small>mdi-plus</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-caption">Add count</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          :disabled="addingCount"
+                          @click="$emit('edit')"
+                        >
+                          <v-icon small>mdi-pencil</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-caption">Edit</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          :disabled="addingCount"
+                          @click="confirmDelete = true"
+                        >
+                          <v-icon small>mdi-delete</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-caption">Delete</span>
+                    </v-tooltip>
+                  </div>
+                </template>
+              </apollo-mutation>
+            </div>
           </div>
         </v-card-text>
         <transition appear name="show-extra">
@@ -110,7 +113,11 @@
 </template>
 
 <script>
-import { updateTargetMutation, deleteTargetMutation, addTargetDoneMutation } from "../gql/target";
+import {
+  updateTargetMutation,
+  deleteTargetMutation,
+  addTargetDoneMutation,
+} from "../gql/target";
 
 export default {
   name: "pd-target-item",
@@ -165,10 +172,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 .pd-target-item {
-  opacity: 0.9;
   box-shadow: none !important;
   align-items: center;
   overflow: hidden;
+  margin: 4px 0;
 
   &:hover,
   &.with-extra {
@@ -178,13 +185,13 @@ export default {
   .target-action {
     display: flex;
     flex: 0;
-    margin: 0 -8px;
   }
 
   .item-content {
-    padding: 8px 24px;
+    padding: 8px;
 
     .item-text {
+      flex: 1;
       flex-direction: column;
       padding-left: 12px;
     }
@@ -208,7 +215,6 @@ export default {
     height: 24px;
     width: 24px;
     opacity: 0.5;
-    margin-right: 8px;
 
     &:hover {
       opacity: 1;
