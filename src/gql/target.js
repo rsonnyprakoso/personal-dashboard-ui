@@ -29,6 +29,38 @@ export const getAllTargetsQuery = gql`
       _targetDoneListMeta {
         count
       }
+      targetDoneList {
+        id
+        doneAt
+      }
+    }
+  }
+  ${targetFragment}
+`
+
+export const getTargetsByCycleQuery = gql`
+  query(
+    $cycle: Int!
+    $startDate: DateTime
+    $endDate: DateTime
+  ) {
+    allTargets(
+      where: { cycle: $cycle },
+      sortBy: [cycle_ASC, cycleTarget_DESC, name_ASC]
+    ) {
+      ...target
+      _targetDoneListMeta(
+        where: {
+          doneAt_gte: $startDate,
+          doneAt_lte: $endDate 
+        }
+      ) {
+        count
+      }
+      targetDoneList {
+        id
+        doneAt
+      }
     }
   }
   ${targetFragment}

@@ -1,54 +1,77 @@
 <template>
-  <apollo-query :query="query">
-    <template v-slot="{ result: { data }, isLoading }">
-      <v-progress-circular
-        v-if="isLoading"
-        indeterminate
-        color="white"
-      ></v-progress-circular>
-      <div v-else :class="`pd-targets ${showForm ? 'blur' : ''} d-flex flex-column justify-flex-start`">
-        <div class="heading text-body-1">Your targets</div>
-        <pd-target-item
-          v-bind="target"
-          v-for="target in data.allTargets"
-          :key="target.id"
-          :refetchQueries="[{ query }]"
-          @edit="startEdit(target)"
+  <div :class="`pd-targets ${showForm ? 'blur' : ''}`">
+    <div class="heading d-flex align-baseline text-body-1">
+      Your
+      <b><u>
+        <v-select
+          :items="cycles"
+          v-model="selectedCycle"
+          class="cycle-select"
+          solo
+          flat
+          background-color="transparent"
+          dense
+          hide-details
         />
-        <v-menu
-          v-model="showForm"
-          :close-on-content-click="false"
-          absolute
-          attach=".right-side"
-          max-width="100%"
+      </u></b>
+      targets
+    </div>
+    <apollo-query :query="query" :variables="variables">
+      <template v-slot="{ result: { data }, isLoading }">
+        <v-progress-circular
+          v-if="isLoading"
+          indeterminate
+          color="white"
+        ></v-progress-circular>
+        <div
+          :key="selectedCycle"
+          v-else
+          class="d-flex flex-column justify-flex-start"
         >
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              class="add-button text-body-1"
-              text
-              color="white"
-              v-on="on"
-              v-bind="attrs"
-            >
-              <v-icon small>mdi-plus</v-icon>
-              <span>Add Target</span>
-            </v-btn>
-          </template>
-          <pd-target-form
-            :target="targetToEdit"
-            @close="closeForm"
+          <pd-target-item
+            v-bind="target"
+            v-for="target in data.allTargets"
+            :key="target.id"
             :refetchQueries="[{ query }]"
+            @edit="startEdit(target)"
           />
-        </v-menu>
-      </div>
-    </template>
-  </apollo-query>
+          <v-menu
+            v-model="showForm"
+            :close-on-content-click="false"
+            absolute
+            attach=".right-side"
+            max-width="100%"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                class="add-button text-body-1"
+                text
+                color="white"
+                v-on="on"
+                v-bind="attrs"
+              >
+                <v-icon small>mdi-plus</v-icon>
+                <span>Add Target</span>
+              </v-btn>
+            </template>
+            <pd-target-form
+              :key="(targetToEdit && targetToEdit.id) || Date.now()"
+              :target="targetToEdit"
+              @close="closeForm"
+              :refetchQueries="[{ query }]"
+            />
+          </v-menu>
+        </div>
+      </template>
+    </apollo-query>
+  </div>
 </template>
 
 <script>
+import moment from "moment";
 import pdTargetItem from "../components/TargetItem";
 import pdTargetForm from "../components/TargetForm";
-import { getAllTargetsQuery } from "../gql/target";
+import { getTargetsByCycleQuery } from "../gql/target";
 
 export default {
   name: "pd-targets",
@@ -59,9 +82,31 @@ export default {
   data: function () {
     return {
       showForm: false,
-      query: getAllTargetsQuery,
+      query: getTargetsByCycleQuery,
+      selectedCycle: 2,
+      cycles: [
+        { text: "daily", value: 1, timestamp: "day" },
+        { text: "weekly", value: 2, timestamp: "week" },
+        { text: "monthly", value: 3, timestamp: "month" },
+        { text: "annual", value: 4, timestamp: "year" },
+      ],
       targetToEdit: null,
     };
+  },
+  computed: {
+    variables: function () {
+      const today = moment();
+      const currentCycle = this.cycles.find(
+        (cycle) => cycle.value === this.selectedCycle
+      );
+      const timestamp = (currentCycle && currentCycle.timestamp) || "week";
+
+      return {
+        cycle: this.selectedCycle,
+        startDate: today.startOf(timestamp),
+        endDate: today.endOf(timestamp),
+      };
+    },
   },
   methods: {
     startEdit: function (target) {
@@ -77,6 +122,16 @@ export default {
 </script>
 
 <style lang="scss">
+.cycle-select {
+  .v-input__slot { padding: 0 6px !important; margin: 0 }
+  .v-select__selections input { width: 0 }
+  .v-input__append-inner { display: none }
+  .v-select__selection {
+    max-width: none;
+    margin: 0 !important
+  }
+}
+
 .target-carousel {
   .v-window__container {
     .v-window__prev,
