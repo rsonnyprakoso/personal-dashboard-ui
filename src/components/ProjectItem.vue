@@ -1,9 +1,9 @@
 <template>
-  <apollo-mutation 
-    :mutation="saveTarget.mutation"
-    :variables="saveTarget.variables"
+  <apollo-mutation
+    :mutation="saveProject.mutation"
+    :variables="saveProject.variables"
     :refetchQueries="refetchQueries"
-    @done="doneEdit()"
+    @done="doneEdit"
   >
     <template v-slot="{ mutate: submit, loading: updating }">
       <apollo-mutation
@@ -15,17 +15,48 @@
             light
             :class="`pd-project-item ${priorityName} ${
               updating || deleting ? 'loading' : ''
-            }`"
+            } ${inactive ? 'inactive' : ''}`"
           >
             <v-card-text
-              v-if="mode === 'view'"
+              v-if="editing || forceEdit"
               class="item-content d-flex align-center"
             >
-              <div class="project-label d-flex flex-column align-start">
-                <div class="text-body-1">{{ name }}</div>
-                <small class="text-caption priority-label">{{
-                  priorityName
-                }}</small>
+              <div class="project-form d-flex flex-column align-stretch">
+                <v-text-field
+                  single-line
+                  dense
+                  label="Project name"
+                  class="project-name-field text-body-1"
+                  v-model="editedName"
+                  :error="error.name"
+                  required
+                  hide-details
+                  height="24"
+                />
+                <div class="priority-field d-flex align-baseline text-caption">
+                  <span>Priority</span>
+                  <v-select
+                    solo
+                    flat
+                    v-model="editedPriority"
+                    :items="priorities"
+                    dense
+                    hide-details
+                    single-line
+                    height="20"
+                  >
+                    <template slot="selection" slot-scope="{ item }">
+                      <span :class="`priority-item ${item.text}`">
+                        {{ item.text }}
+                      </span>
+                    </template>
+                    <template slot="item" slot-scope="{ item }">
+                      <span class="priority-item">
+                        <small>{{ item.text }}</small>
+                      </span>
+                    </template>
+                  </v-select>
+                </div>
               </div>
               <div class="d-flex align-flex-start">
                 <v-tooltip top>
@@ -35,7 +66,49 @@
                       color="primary"
                       small
                       v-on="on"
-                      @click="$emit('edit')"
+                      @click="validateAndSubmit(submit)"
+                      :disabled="!editing || inactive"
+                    >
+                      <v-icon small>mdi-check</v-icon>
+                    </v-btn>
+                  </template>
+                  <span class="text-body-2">Save</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      icon
+                      color="error"
+                      small
+                      v-on="on"
+                      @click="doneEdit"
+                      :disabled="!editing || inactive"
+                    >
+                      <v-icon small>mdi-close</v-icon>
+                    </v-btn>
+                  </template>
+                  <span class="text-body-2">Cancel</span>
+                </v-tooltip>
+              </div>
+            </v-card-text>
+
+            <v-card-text v-else class="item-content d-flex align-center">
+              <div class="project-label d-flex flex-column align-start">
+                <div class="text-body-1">{{ name }}</div>
+                <span :class="`text-caption priority-label ${priorityName}`">
+                  <small>{{ priorityName }}</small>
+                </span>
+              </div>
+              <div class="d-flex align-flex-start">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      icon
+                      color="primary"
+                      small
+                      v-on="on"
+                      @click="startEdit"
+                      :disabled="editing || inactive"
                     >
                       <v-icon small>mdi-pencil</v-icon>
                     </v-btn>
@@ -50,6 +123,7 @@
                       small
                       v-on="on"
                       @click="confirmDelete = true"
+                      :disabled="editing || inactive"
                     >
                       <v-icon small>mdi-delete</v-icon>
                     </v-btn>
@@ -58,74 +132,27 @@
                 </v-tooltip>
               </div>
             </v-card-text>
-            <v-card-text
-              v-if="mode === 'edit'"
-              class="item-content d-flex align-center"
-            >
-              <div class="project-label d-flex flex-column align-start">
-                <v-text-field
-                  single-line
-                  dense
-                  full-width
-                  label="Project name"
-                  class="text-body-2"
-                  v-model="editedName"
-                  :error="error.name"
-                  required
-                />
-                <div class="d-flex align-baseline text-body-2">
-                  <span>Priority</span>
-                  <v-select
-                    solo
-                    flat
-                    v-model="editedPriority"
-                    :items="priorities"
-                    dense
-                    hide-details="auto"
-                    class="text-caption"
+
+            <transition appear name="show-error">
+              <v-alert
+                v-if="hasError"
+                small
+                dense
+                class="text-body-2"
+                text
+                color="red"
+              >
+                <ul>
+                  <li
+                    class="text-left"
+                    v-for="errorKey in Object.keys(error)"
+                    :key="errorKey"
                   >
-                    <template slot="selection" slot-scope="{ item }">
-                      <span :class="'priority-item ' + item.text">{{
-                        item.text
-                      }}</span>
-                    </template>
-                    <template slot="item" slot-scope="{ item }">
-                      <span class="priority-item">{{ item.text }}</span>
-                    </template>
-                  </v-select>
-                </div>
-              </div>
-              <div class="d-flex align-flex-start">
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      color="primary"
-                      small
-                      v-on="on"
-                      @click="submit({ variables: { id, name: editedName, priority: editedPriority } })"
-                    >
-                      <v-icon small>mdi-check</v-icon>
-                    </v-btn>
-                  </template>
-                  <span class="text-body-2">Save</span>
-                </v-tooltip>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      color="error"
-                      small
-                      v-on="on"
-                      @click="confirmDelete = true"
-                    >
-                      <v-icon small>mdi-delete</v-icon>
-                    </v-btn>
-                  </template>
-                  <span class="text-body-2">Delete</span>
-                </v-tooltip>
-              </div>
-            </v-card-text>
+                    {{ error[errorKey] }}
+                  </li>
+                </ul>
+              </v-alert>
+            </transition>
             <transition appear name="show-extra">
               <v-card-text
                 class="extra-content blue-grey lighten-5"
@@ -153,26 +180,6 @@
                   </div>
                 </div>
               </v-card-text>
-              <v-card-text
-                class="extra-content blue-grey lighten-5"
-                v-if="confirmCancel"
-              >
-                <div class="d-flex flex-column">
-                  <v-alert small dense class="text-body-2" text color="red"
-                    >Are you sure you want to cancel? All unsaved data will be cleared!</v-alert
-                  >
-                  <div class="d-flex">
-                    <v-btn color="red" text small @click="doneEdit()">yes, cancel!</v-btn>
-                    <v-btn
-                      color="primary"
-                      text
-                      small
-                      @click="confirmCancel = false"
-                      >no, stay here</v-btn
-                    >
-                  </div>
-                </div>
-              </v-card-text>
             </transition>
           </v-card>
         </template>
@@ -182,54 +189,85 @@
 </template>
 
 <script>
-import moment from "moment";
-import { updateprojectPartialMutation, deleteprojectMutation } from "../gql/project";
+import {
+  addProjectMutation,
+  updateProjectMutation,
+  deleteProjectMutation,
+} from "../gql/project";
 
 export default {
   name: "pd-project-item",
-  props: ["id", "name", "priority", "refetchQueries"],
+  props: {
+    id: Number,
+    name: String,
+    priority: Number,
+    refetchQueries: Array,
+    inactive: Boolean,
+    forceEdit: Boolean,
+  },
   data: function () {
     return {
-      mode: "view",
-      updateMutation: updateprojectPartialMutation,
-      deleteMutation: deleteprojectMutation,
+      updateMutation: updateProjectMutation,
+      deleteMutation: deleteProjectMutation,
       confirmCancel: false,
       confirmDelete: false,
+      editing: this.forceEdit,
       editedName: "",
-      editedPriority: "",
+      editedPriority: "2",
+      error: {},
       priorities: [
         { value: "1", text: "high" },
         { value: "2", text: "medium" },
-        { value: "3", text: "low" }
-      ]
+        { value: "3", text: "low" },
+      ],
     };
   },
   methods: {
     startEdit: function () {
       this.editedName = this.name;
-      this.editedPriority = this.priority;
-      this.mode = "edit";
-      this.$emit('startEdit', this.id);
+      this.editedPriority = this.priority ? this.priority.toString() : "2";
+      this.editing = true;
+      this.$emit("startEdit");
     },
     doneEdit: function () {
       this.editedName = "";
-      this.editedPriority = "";
-      this.mode = "view";
-      this.$emit('doneEdit');
+      this.editedPriority = "2";
+      this.editing = false;
+      this.confirmCancel = false;
+      this.confirmDelete = false;
+      this.$emit("doneEdit");
+    },
+    validateAndSubmit: async function (submit) {
+      const error = {};
+      if (!this.editedName) {
+        error.name = "Please provide task name";
+      }
+
+      this.error = error;
+      if (Object.keys(error).length === 0) {
+        submit();
+      }
     },
   },
   computed: {
     priorityName: function () {
-      const selectedPriority = this.priorities.find(p => p.value === this.priority);
-      return (selectedPriority && selectedPriority.name) || '';
+      const priorityNames = {
+        1: "high",
+        2: "medium",
+        3: "low",
+      };
+      return priorityNames[this.priority];
+    },
+    hasError: function() {
+      return Object.keys(this.error).length > 0;
     },
     saveProject: function () {
       const values = {
         name: this.editedName,
-        priority: this.editedPriority
+        priority: this.editedPriority ? Number(this.editedPriority) : undefined,
       };
       return {
-        mutation: this.id ? updateTargetMutation : addTargetMutation,
+        mutation: this.id ? updateProjectMutation : addProjectMutation,
         variables: this.id ? { ...values, id: this.id } : values,
       };
     },
@@ -239,20 +277,41 @@ export default {
 
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="scss">
+.priority-field {
+  margin-top: 4px;
+  align-self: flex-start;
+
+  .v-input__slot,
+  .v-input__control {
+    min-height: 20px !important;
+  }
+  .v-select__selections input {
+    width: 0;
+  }
+  .v-select__selection {
+    max-width: none;
+    margin: 0 !important;
+  }
+}
+
+.project-name-field {
+  .v-input__slot,
+  .v-input__control {
+    min-height: 32px !important;
+  }
+}
+</style>
 <style lang="scss" scoped>
 .pd-project-item {
-  opacity: 0.9;
+  opacity: 1;
   transition: 0.2s all linear;
   margin: 4px 0;
   align-items: center;
   overflow: hidden;
 
-  &.checked {
-    opacity: 0.5;
-
-    .project-label {
-      text-decoration: line-through;
-    }
+  &.inactive {
+    opacity: 0.2;
   }
 
   .item-content,
@@ -296,11 +355,6 @@ export default {
   }
 
   &.high {
-    .project-checkbox i,
-    .project-loading {
-      color: map-get($red, "lighten-1");
-    }
-
     .project-label {
       text-decoration-color: map-get($red, "darken-4");
     }
@@ -311,11 +365,6 @@ export default {
   }
 
   &.medium {
-    .project-checkbox i,
-    .project-loading {
-      color: map-get($orange, "darken-2");
-    }
-
     .project-label {
       text-decoration-color: map-get($orange, "darken-4");
     }
@@ -326,11 +375,6 @@ export default {
   }
 
   &.low {
-    .project-checkbox i,
-    .project-loading {
-      color: map-get($green, "darken-2");
-    }
-
     .project-label {
       text-decoration-color: map-get($green, "darken-4");
     }
@@ -340,17 +384,40 @@ export default {
     }
   }
 
+  .project-form {
+    flex: 1;
+  }
+
+  .priority-item {
+    font-variant: small-caps;
+
+    &.high {
+      color: map-get($red, "lighten-1");
+    }
+
+    &.medium {
+      color: map-get($orange, "darken-2");
+    }
+
+    &.low {
+      color: map-get($green, "darken-2");
+    }
+  }
+
+  .show-error-enter-active,
+  .show-error-leave-active,
   .show-extra-enter-active,
   .show-extra-leave-active {
     transition: all 0.2s ease;
     max-height: 100vh;
   }
 
+  .show-error-enter,
+  .show-error-leave-to,
   .show-extra-enter,
   .show-extra-leave-to {
     max-height: 0;
-    padding: 0;
-    padding-left: 32px;
+    opacity: 0;
   }
 }
 </style>

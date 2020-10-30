@@ -38,7 +38,6 @@
           <v-menu
             v-model="showForm"
             :close-on-content-click="false"
-            absolute
             attach=".right-side"
             max-width="100%"
           >
@@ -173,7 +172,7 @@ export default {
 }
 
 .v-menu__content {
-  bottom: 0 !important;
+  bottom: 40px !important;
   left: 0 !important;
   right: 0 !important;
   top: unset !important;

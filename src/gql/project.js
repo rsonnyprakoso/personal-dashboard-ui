@@ -45,6 +45,7 @@ export const addProjectMutation = gql`
       data: {
         name: $name
         priority: $priority
+        status: 3
       }
     ) {
       ...project
