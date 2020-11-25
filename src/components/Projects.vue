@@ -1,49 +1,72 @@
 <template>
-  <apollo-query :query="query">
-    <template v-slot="{ result: { data }, isLoading }">
-      <v-progress-circular
-        v-if="isLoading"
-        indeterminate
-        color="white"
-      ></v-progress-circular>
-      <div v-else class="pd-projects d-flex flex-column justify-flex-start">
-        <pd-project-item
-          v-for="project in data.allProjects"
-          :key="project.id"
-          v-bind="project"
-          :refetchQueries="[{ query }]"
-          :inactive="!!(editedProjectId && editedProjectId !== project.id)"
-          @startEdit="editedProjectId = project.id"
-          @doneEdit="editedProjectId = ''"
-        />
-        <pd-project-item
-          v-if="editedProjectId === 'new'"
-          v-bind="newProject"
-          :refetchQueries="[{ query }]"
-          @doneEdit="doneAdd"
-          :inactive="false"
-          force-edit
-        />
-        <v-btn
-          @click="editedProjectId = 'new'"
-          class="add-button text-body-1"
-          text
+  <div class="pd-projects">
+    <div class="heading d-flex align-baseline text-body-1">
+      Your
+      <b
+        ><u>
+          <v-select
+            :items="statuses"
+            v-model="selectedStatus"
+            class="cycle-select"
+            solo
+            flat
+            background-color="transparent"
+            dense
+            hide-details
+          /> </u
+      ></b>
+      projects
+    </div>
+    <apollo-query :query="query" :variables="{ status: selectedStatus }" fetch-policy="network-only">
+      <template v-slot="{ result: { data }, isLoading }">
+        <v-progress-circular
+          v-if="isLoading"
+          indeterminate
           color="white"
-          v-bind="attrs"
-          v-on="on"
-          :disabled="!!editedProjectId"
+        ></v-progress-circular>
+        <div
+          :key="selectedStatus"
+          v-else
+          class="d-flex flex-column justify-flex-start"
         >
-          <v-icon small>mdi-plus</v-icon>
-          <span>Add Project</span>
-        </v-btn>
-      </div>
-    </template>
-  </apollo-query>
+          <pd-project-item
+            v-for="project in data.allProjects"
+            :key="project.id"
+            v-bind="project"
+            :refetchQueries="[{ query, variables: { status: selectedStatus } }]"
+            :inactive="!!(editedProjectId && editedProjectId !== project.id)"
+            @startEdit="editedProjectId = project.id"
+            @doneEdit="editedProjectId = ''"
+          />
+          <pd-project-item
+            v-if="editedProjectId === 'new'"
+            v-bind="newProject"
+            :refetchQueries="[{ query, variables: { status: selectedStatus } }]"
+            @doneEdit="doneAdd"
+            :inactive="false"
+            force-edit
+          />
+          <v-btn
+            @click="editedProjectId = 'new'"
+            class="add-button text-body-1"
+            text
+            color="white"
+            v-bind="attrs"
+            v-on="on"
+            :disabled="!!editedProjectId"
+          >
+            <v-icon small>mdi-plus</v-icon>
+            <span>Add {{ selectedStatusName }} project</span>
+          </v-btn>
+        </div>
+      </template>
+    </apollo-query>
+  </div>
 </template>
 
 <script>
 import pdProjectItem from "../components/ProjectItem";
-import { getAllProjectsQuery } from "../gql/project";
+import { getProjectsByStatusQuery } from "../gql/project";
 
 export default {
   name: "pd-projects",
@@ -52,24 +75,41 @@ export default {
   },
   data: function () {
     return {
-      query: getAllProjectsQuery,
+      selectedStatus: 3,
+      query: getProjectsByStatusQuery,
       editedProjectId: "",
       adding: false,
-      newProject: {
-        name: '',
-        priority: ''
-      }
+      statuses: [
+        { text: "to-do", value: 1 },
+        { text: "upcoming", value: 2 },
+        { text: "ongoing", value: 3 },
+        { text: "postponed", value: 4 },
+        { text: "completed", value: 5 },
+      ],
     };
   },
   methods: {
-    doneAdd: function() {
-      this.editedProjectId = '';
+    doneAdd: function () {
+      this.editedProjectId = "";
       this.newProject = {
-        name: '',
-        priority: ''
+        name: "",
+        priority: "",
+      };
+    },
+  },
+  computed: {
+    selectedStatusName: function () {
+      const status = this.statuses.find((s) => s.value === this.selectedStatus);
+      return (status && status.text) || "";
+    },
+    newProject: function() {
+      return {
+        name: "",
+        priority: "",
+        status: this.selectedStatus
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

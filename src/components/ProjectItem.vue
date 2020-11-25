@@ -11,177 +11,254 @@
         :refetchQueries="refetchQueries"
       >
         <template v-slot="{ mutate: remove, loading: deleting }">
-          <v-card
-            light
-            :class="`pd-project-item ${priorityName} ${
-              updating || deleting ? 'loading' : ''
-            } ${inactive ? 'inactive' : ''}`"
+          <apollo-mutation
+            :mutation="updateStatusMutation"
+            :refetchQueries="refetchQueries"
           >
-            <v-card-text
-              v-if="editing || forceEdit"
-              class="item-content d-flex align-center"
-            >
-              <div class="project-form d-flex flex-column align-stretch">
-                <v-text-field
-                  single-line
-                  dense
-                  label="Project name"
-                  class="project-name-field text-body-1"
-                  v-model="editedName"
-                  :error="error.name"
-                  required
-                  hide-details
-                  height="24"
-                />
-                <div class="priority-field d-flex align-baseline text-caption">
-                  <span>Priority</span>
-                  <v-select
-                    solo
-                    flat
-                    v-model="editedPriority"
-                    :items="priorities"
-                    dense
-                    hide-details
-                    single-line
-                    height="20"
-                  >
-                    <template slot="selection" slot-scope="{ item }">
-                      <span :class="`priority-item ${item.text}`">
-                        {{ item.text }}
-                      </span>
-                    </template>
-                    <template slot="item" slot-scope="{ item }">
-                      <span class="priority-item">
-                        <small>{{ item.text }}</small>
-                      </span>
-                    </template>
-                  </v-select>
-                </div>
-              </div>
-              <div class="d-flex align-flex-start">
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      color="primary"
-                      small
-                      v-on="on"
-                      @click="validateAndSubmit(submit)"
-                      :disabled="!editing || inactive"
-                    >
-                      <v-icon small>mdi-check</v-icon>
-                    </v-btn>
-                  </template>
-                  <span class="text-body-2">Save</span>
-                </v-tooltip>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      color="error"
-                      small
-                      v-on="on"
-                      @click="doneEdit"
-                      :disabled="!editing || inactive"
-                    >
-                      <v-icon small>mdi-close</v-icon>
-                    </v-btn>
-                  </template>
-                  <span class="text-body-2">Cancel</span>
-                </v-tooltip>
-              </div>
-            </v-card-text>
-
-            <v-card-text v-else class="item-content d-flex align-center">
-              <div class="project-label d-flex flex-column align-start">
-                <div class="text-body-1">{{ name }}</div>
-                <span :class="`text-caption priority-label ${priorityName}`">
-                  <small>{{ priorityName }}</small>
-                </span>
-              </div>
-              <div class="d-flex align-flex-start">
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      color="primary"
-                      small
-                      v-on="on"
-                      @click="startEdit"
-                      :disabled="editing || inactive"
-                    >
-                      <v-icon small>mdi-pencil</v-icon>
-                    </v-btn>
-                  </template>
-                  <span class="text-body-2">Edit</span>
-                </v-tooltip>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      icon
-                      color="error"
-                      small
-                      v-on="on"
-                      @click="confirmDelete = true"
-                      :disabled="editing || inactive"
-                    >
-                      <v-icon small>mdi-delete</v-icon>
-                    </v-btn>
-                  </template>
-                  <span class="text-body-2">Delete</span>
-                </v-tooltip>
-              </div>
-            </v-card-text>
-
-            <transition appear name="show-error">
-              <v-alert
-                v-if="hasError"
-                small
-                dense
-                class="text-body-2"
-                text
-                color="red"
+            <template v-slot="{ mutate: updateStatus, loading: updatingStatus }">
+              <v-card
+                light
+                :class="`pd-project-item ${priorityName} ${
+                  updating || deleting || updatingStatus ? 'loading' : ''
+                } ${inactive ? 'inactive' : ''}`"
               >
-                <ul>
-                  <li
-                    class="text-left"
-                    v-for="errorKey in Object.keys(error)"
-                    :key="errorKey"
-                  >
-                    {{ error[errorKey] }}
-                  </li>
-                </ul>
-              </v-alert>
-            </transition>
-            <transition appear name="show-extra">
-              <v-card-text
-                class="extra-content blue-grey lighten-5"
-                v-if="confirmDelete"
-              >
-                <div class="d-flex flex-column">
-                  <v-alert small dense class="text-body-2" text color="red"
-                    >Are you sure you want to delete this project?</v-alert
-                  >
-                  <div class="d-flex">
-                    <v-btn
-                      color="red"
-                      text
-                      small
-                      @click="remove({ variables: { id } })"
-                      >yes, delete it!</v-btn
+                <v-card-text
+                  v-if="editing || forceEdit"
+                  class="item-content d-flex align-baseline"
+                >
+                  <div class="project-form d-flex flex-column align-stretch">
+                    <v-text-field
+                      single-line
+                      dense
+                      label="Project name"
+                      class="project-name-field text-body-1"
+                      v-model="editedName"
+                      :error="error.name"
+                      required
+                      hide-details
+                      height="24"
+                    />
+                    <div
+                      class="priority-field d-flex align-baseline text-caption"
                     >
-                    <v-btn
-                      color="primary"
-                      text
-                      small
-                      @click="confirmDelete = false"
-                      >no, go back</v-btn
-                    >
+                      <span>Priority</span>
+                      <v-select
+                        solo
+                        flat
+                        v-model="editedPriority"
+                        :items="priorities"
+                        dense
+                        hide-details
+                        single-line
+                        height="20"
+                      >
+                        <template slot="selection" slot-scope="{ item }">
+                          <span :class="`priority-item ${item.text}`">
+                            {{ item.text }}
+                          </span>
+                        </template>
+                        <template slot="item" slot-scope="{ item }">
+                          <span class="priority-item">
+                            <small>{{ item.text }}</small>
+                          </span>
+                        </template>
+                      </v-select>
+                    </div>
                   </div>
-                </div>
-              </v-card-text>
-            </transition>
-          </v-card>
+                  <div class="d-flex align-flex-start">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          small
+                          color="primary"
+                          class="bottom-icon"
+                          v-on="on"
+                          @click="validateAndSubmit(submit)"
+                          :disabled="!editing || inactive"
+                        >
+                          <v-icon small>mdi-check</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Save</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          class="bottom-icon"
+                          small
+                          color="error"
+                          v-on="on"
+                          @click="doneEdit"
+                          :disabled="!editing || inactive"
+                        >
+                          <v-icon small>mdi-close</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Cancel</span>
+                    </v-tooltip>
+                  </div>
+                </v-card-text>
+
+                <v-card-text v-else class="item-content d-flex align-center">
+                  <div class="project-label d-flex flex-column align-start">
+                    <div class="text-body-1">{{ name }}</div>
+                    <span
+                      :class="`text-caption priority-label ${priorityName}`"
+                    >
+                      <small>{{ priorityName }}</small>
+                    </span>
+                  </div>
+                  <div class="d-flex align-flex-start">
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          @click="startEdit"
+                          :disabled="editing || inactive || deleting || updatingStatus"
+                        >
+                          <v-icon small>mdi-pencil</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Edit</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          v-if="status === 1"
+                          icon
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          @click="updateStatus({ variables: { id, status: 2 } })"
+                          :disabled="editing || inactive || deleting || updatingStatus"
+                        >
+                          <v-icon small>mdi-calendar-clock</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Set to upcoming</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          v-if="[1, 2, 4].includes(status)"
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          @click="updateStatus({ variables: { id, status: 3 } })"
+                          :disabled="editing || inactive || deleting || updatingStatus"
+                        >
+                          <v-icon small>mdi-clock-time-three</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Do it now</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          v-if="status === 3"
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          @click="updateStatus({ variables: { id, status: 4 } })"
+                          :disabled="editing || inactive || deleting || updatingStatus"
+                        >
+                          <v-icon small>mdi-calendar-arrow-right</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Postpone</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          v-if="[3, 4].includes(status)"
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          @click="updateStatus({ variables: { id, status: 5 } })"
+                          :disabled="editing || inactive || deleting || updatingStatus"
+                        >
+                          <v-icon small>mdi-calendar-check</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Mark as done</span>
+                    </v-tooltip>
+                    <v-tooltip bottom>
+                      <template v-slot:activator="{ on }">
+                        <v-btn
+                          icon
+                          class="bottom-icon"
+                          small
+                          v-on="on"
+                          @click="confirmDelete = true"
+                          :disabled="editing || inactive || deleting || updatingStatus"
+                        >
+                          <v-icon small>mdi-delete</v-icon>
+                        </v-btn>
+                      </template>
+                      <span class="text-body-2">Delete</span>
+                    </v-tooltip>
+                  </div>
+                </v-card-text>
+
+                <transition appear name="show-error">
+                  <v-alert
+                    v-if="hasError"
+                    small
+                    dense
+                    class="text-body-2"
+                    text
+                    color="red"
+                  >
+                    <ul>
+                      <li
+                        class="text-left"
+                        v-for="errorKey in Object.keys(error)"
+                        :key="errorKey"
+                      >
+                        {{ error[errorKey] }}
+                      </li>
+                    </ul>
+                  </v-alert>
+                </transition>
+                <transition appear name="show-extra">
+                  <v-card-text
+                    class="extra-content blue-grey lighten-5"
+                    v-if="confirmDelete"
+                  >
+                    <div class="d-flex flex-column">
+                      <v-alert small dense class="text-body-2" text color="red"
+                        >Are you sure you want to delete this project?</v-alert
+                      >
+                      <div class="d-flex">
+                        <v-btn
+                          color="red"
+                          text
+                          small
+                          @click="remove({ variables: { id } })"
+                          >yes, delete it!</v-btn
+                        >
+                        <v-btn
+                          color="primary"
+                          text
+                          small
+                          @click="confirmDelete = false"
+                          >no, go back</v-btn
+                        >
+                      </div>
+                    </div>
+                  </v-card-text>
+                </transition>
+              </v-card>
+            </template>
+          </apollo-mutation>
         </template>
       </apollo-mutation>
     </template>
@@ -193,6 +270,7 @@ import {
   addProjectMutation,
   updateProjectMutation,
   deleteProjectMutation,
+  updateProjectStatusMutation,
 } from "../gql/project";
 
 export default {
@@ -201,6 +279,7 @@ export default {
     id: Number,
     name: String,
     priority: Number,
+    status: Number,
     refetchQueries: Array,
     inactive: Boolean,
     forceEdit: Boolean,
@@ -208,6 +287,7 @@ export default {
   data: function () {
     return {
       updateMutation: updateProjectMutation,
+      updateStatusMutation: updateProjectStatusMutation,
       deleteMutation: deleteProjectMutation,
       confirmCancel: false,
       confirmDelete: false,
@@ -258,7 +338,7 @@ export default {
       };
       return priorityNames[this.priority];
     },
-    hasError: function() {
+    hasError: function () {
       return Object.keys(this.error).length > 0;
     },
     saveProject: function () {
@@ -268,7 +348,9 @@ export default {
       };
       return {
         mutation: this.id ? updateProjectMutation : addProjectMutation,
-        variables: this.id ? { ...values, id: this.id } : values,
+        variables: this.id
+          ? { ...values, id: this.id }
+          : { ...values, status: this.status },
       };
     },
   },
@@ -309,6 +391,22 @@ export default {
   margin: 4px 0;
   align-items: center;
   overflow: hidden;
+
+  .bottom-icon.v-btn--icon {
+    height: 24px;
+    width: 24px;
+    opacity: 0.5;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .v-btn__content .v-icon {
+      height: 24px;
+      width: 24px;
+      font-size: 14px !important;
+    }
+  }
 
   &.inactive {
     opacity: 0.2;
